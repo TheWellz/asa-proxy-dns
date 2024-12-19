@@ -48,7 +48,6 @@ services:
     image: www-nginx
     container_name: www
     restart: always
-    tty: true
     volumes:
       - ./www/:/usr/share/nginx/html/
     networks:
