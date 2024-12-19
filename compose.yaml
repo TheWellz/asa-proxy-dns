@@ -1,0 +1,71 @@
+services:
+
+  dns:
+    build:
+      context: ./dns
+      dockerfile: Dockerfile
+    image: ubuntu-bind
+    container_name: dns
+    restart: always
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+    networks:
+      - asa-network
+
+  proxy:
+    build:
+      context: ./proxy
+      dockerfile: Dockerfile
+    image: proxy-nginx
+    container_name: proxy
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - asa-server
+      - www
+      - mail
+    networks:
+      - asa-network
+
+  asa-server:
+    build:
+      context: ./asa-server
+      dockerfile: Dockerfile
+    image: asa-server-nginx
+    container_name: asa-server
+    restart: always
+    volumes:
+      - ./asa-server/:/usr/share/nginx/html/
+    networks:
+      - asa-network
+
+  www:
+    build:
+      context: ./www
+      dockerfile: Dockerfile
+    image: www-nginx
+    container_name: www
+    restart: always
+    tty: true
+    volumes:
+      - ./www/:/usr/share/nginx/html/
+    networks:
+      - asa-network
+
+  mail:
+    build:
+      context: ./mail
+      dockerfile: Dockerfile
+    image: mail-nginx
+    container_name: mail
+    restart: always
+    volumes:
+      - ./mail/:/usr/share/nginx/html/
+    networks:
+      - asa-network
+
+networks:
+  asa-network:
+    driver: bridge
